@@ -1,0 +1,49 @@
+/* pages/tables/tb1/tb1.wxss */
+.top{
+  background-color: #5bc4c7;
+  height: 60rpx;
+  text-align: center;
+
+}
+
+.title{
+  color: white;
+  
+}
+
+.scroll-view{
+  height: 1000rpx;
+}
+
+
+.container{
+  height: 1300rpx;
+  
+}
+
+
+checkbox {
+  width: 240rpx;
+  height: 90rpx;
+}
+/*checkbox 选项框大小  */
+checkbox .wx-checkbox-input {
+  width: 50rpx;
+  height: 50rpx;
+}
+/*checkbox选中后样式  */
+checkbox .wx-checkbox-input.wx-checkbox-input-checked {
+  background: #FF525C;
+}
+/*checkbox选中后图标样式  */
+checkbox .wx-checkbox-input.wx-checkbox-input-checked::before {
+  width: 28rpx;
+  height: 28rpx;
+  line-height: 28rpx;
+  text-align: center;
+  font-size: 22rpx;
+  color: #fff;
+  background: transparent;
+  transform: translate(-50%, -50%) scale(1);
+  -webkit-transform: translate(-50%, -50%) scale(1);
+}
