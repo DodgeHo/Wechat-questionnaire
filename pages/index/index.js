@@ -7,7 +7,7 @@ Page({
   data: {
     motto: 'Hello World',
     tables:[
-      { text: 'PDQ-4', id: 'tb1'},
+      { text: 'PDQ-4', id: 'pdq4'},
       { text: '更多测试尽情期待', id: '0'},
 
     ]
