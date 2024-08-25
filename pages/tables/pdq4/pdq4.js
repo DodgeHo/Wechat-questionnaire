@@ -1,64 +1,100 @@
 // pages/tables/pdq4/pdq4.js
 const data = require('./pdq4_data.js');
 Page({
-  data: data.initialData,
+
+  data: {
+    currentQuestionIndex: 0, // 当前题目索引
+    totalQuestions: 0,       // 总题目数量
+    currentForm: {},         // 当前显示的题目数据
+    progress: 0,             // 进度条百分比
+    ...data.initialData
+  },
   
-  radioChange: function (e) {
-    var value = e.detail.value;
-    let id = e.target.id-1 ;
-
-    this.data.choices[id+1]=Number(value);
-    console.log('radio发生change事件，携带id value值为：', id,value);
-
-    var radioItems = this.data.forms[id].radioItems;
-    
-    for (var i = 0, len = radioItems.length; i < len; ++i) {
-      radioItems[i].checked = radioItems[i].value == value;
-    }
-    
-    let form = 'forms[' + id + '].radioItems'
+  // 页面加载时初始化题目
+  onLoad: function(options) {
     this.setData({
-      [form] : radioItems
+      totalQuestions: this.data.forms.length,
+      currentForm: this.data.forms[0] // 默认加载第一个题目
     });
-  }, 
+    this.updateProgress();
+  },
 
-  
-  checkboxChange: function (e) {
-    let id = e.target.id-1 
-    var values = e.detail.value;
-    var sum = 0;
-    if(id==106-1){
-      if (values.length>=2)
-        this.data.choices[106]=1;
-      else
-        this.data.choices[106]=0;
-    }
-    else if (id == 107-1) {
-      if (values.length >= 3)
-        this.data.choices[107] = 1;
-      else
-        this.data.choices[107] = 0;
-    }
-
-    console.log('checkbox发生change事件，携带value值为：',id, e.detail.value);
-    console.log('arr为：', this.data.choices);
-    var checkboxItems = this.data.forms[id].radioItems, values = e.detail.value;
-    for (var i = 0, lenI = checkboxItems.length; i < lenI; ++i) {
-      checkboxItems[i].checked = false;
-
-      for (var j = 0, lenJ = values.length; j < lenJ; ++j) {
-        if (checkboxItems[i].value == values[j]) {
-          checkboxItems[i].checked = true;
-          break;
-        }
-      }
-    }
-    let checkbox = 'forms[' + id + '].radioItems'
-    console.log(checkbox)
+  // 更新进度条
+  updateProgress: function() {
+    const progress = ((this.data.currentQuestionIndex + 1) / this.data.totalQuestions) * 100;
     this.setData({
-      [checkbox] : checkboxItems
+      progress: progress
     });
   },
+
+  // 切换到下一题
+  nextQuestion: function() {
+    if (this.data.currentQuestionIndex < this.data.totalQuestions - 1) {
+      let newIndex = this.data.currentQuestionIndex + 1;
+      this.setData({
+        currentQuestionIndex: newIndex,
+        currentForm: this.data.forms[newIndex]
+      });
+      this.updateProgress();
+    }
+  },
+
+  // 切换到上一题
+  prevQuestion: function() {
+    if (this.data.currentQuestionIndex > 0) {
+      let newIndex = this.data.currentQuestionIndex - 1;
+      this.setData({
+        currentQuestionIndex: newIndex,
+        currentForm: this.data.forms[newIndex]
+      });
+      this.updateProgress();
+    }
+  },
+
+
+  radioChange: function(e) {
+    const value = e.detail.value;
+    const items = this.data.currentForm.radioItems.map((item) => {
+      return {
+        ...item,
+        checked: item.value === value
+      };
+    });
+  
+    this.setData({
+      'currentForm.radioItems': items
+    });
+  
+    // 更新整体表单数组中的当前题目状态
+    let updatedForms = this.data.forms;
+    updatedForms[this.data.currentQuestionIndex].radioItems = items;
+    this.setData({
+      forms: updatedForms
+    });
+  },
+  
+  checkboxChange: function(e) {
+    const values = e.detail.value;
+    const items = this.data.currentForm.radioItems.map((item) => {
+      return {
+        ...item,
+        checked: values.indexOf(item.value) !== -1
+      };
+    });
+  
+    this.setData({
+      'currentForm.radioItems': items
+    });
+  
+    // 更新整体表单数组中的当前题目状态
+    let updatedForms = this.data.forms;
+    updatedForms[this.data.currentQuestionIndex].radioItems = items;
+    this.setData({
+      forms: updatedForms
+    });
+  },
+  
+
 
   bindAgreeChange: function (e) {
     this.setData({
@@ -125,65 +161,9 @@ Page({
     }
       
   },
-
-
-  /**
-   * 生命周期函数--监听页面加载
-   */
-  onLoad: function (options) {
-      console.log()
-      
   
-  },
-
-  /**
-   * 生命周期函数--监听页面初次渲染完成
-   */
-  onReady: function () {
-   
-  },
-
-  /**
-   * 生命周期函数--监听页面显示
-   */
-  onShow: function () {
-  
-  },
-
-  /**
-   * 生命周期函数--监听页面隐藏
-   */
-  onHide: function () {
-  
-  },
-
-  /**
-   * 生命周期函数--监听页面卸载
-   */
-  onUnload: function () {
-  
-  },
-
-  /**
-   * 页面相关事件处理函数--监听用户下拉动作
-   */
-  onPullDownRefresh: function () {
-   
 
 
-  },
 
-  /**
-   * 页面上拉触底事件的处理函数
-   */
-  onReachBottom: function () {
-  
-  },
-
-  /**
-   * 用户点击右上角分享
-   */
-  onShareAppMessage: function () {
-  
-  }
 })
+

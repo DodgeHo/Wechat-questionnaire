@@ -1,31 +1,24 @@
-
-<view class="page" >
+<view class="page">
   <view class='top'>
       <text class='title'>{{title}}</text>
   </view> 
 
   <view class="page__hd">
       <view class="page__title">说明</view>
-      <view class="page__desc">PDQ-4是依据DSM-Ⅳ对PDQ所作的进一步修订，包括107个项目，归为12个领域，分别用于评估（偏执型、分裂性、分裂型、癔病型、自恋型、边缘型、反社会型、回避型、依赖型、强迫型、被动攻击型、抑郁型）的12种类型的人格障碍。
-      </view>
-      <view class="page__desc">该问卷曾被作为评估各种精神疾病人群的工具之一。也用于健康人群的测试，方便被测试人了解自己的人格。
-      </view>
+      <view class="page__desc">PDQ-4是依据DSM-Ⅳ对PDQ所作的进一步修订，包括107个项目，归为12个领域，分别用于评估（偏执型、分裂性、分裂型、癔病型、自恋型、边缘型、反社会型、回避型、依赖型、强迫型、被动攻击型、抑郁型）的12种类型的人格障碍。</view>
+      <view class="page__desc">该问卷曾被作为评估各种精神疾病人群的工具之一。也用于健康人群的测试，方便被测试人了解自己的人格。</view>
   </view> 
 
   <view class="page__bd" wx:if="{{!finish}}">
-  <!--顶部警告-->
       <view class="weui-toptips weui-toptips_warn" wx:if="{{showTopTips}}">{{TopTipsText}}</view>
-      
-      <!--问卷本体-->
-      <view wx:for="{{forms}}">
-        <!--单选题-->
-        <block wx:if="{{item.formType=='1'}}">
-          <view class="weui-cells__title">{{item.qText}}</view>
-          <view class="weui-cells weui-cells_after-title">
-              <radio-group id='{{item.order}}' bindchange="radioChange">
-                  <label class="weui-cell weui-check__label" wx:for="{{item.radioItems}}" wx:key="value"  >
-                      <radio class="weui-check" value="{{item.value}}" checked="{{item.checked}}"/>
 
+      <!-- 显示当前题目 -->
+      <block wx:if="{{currentForm.formType=='1'}}">
+          <view class="weui-cells__title">{{currentForm.qText}}</view>
+          <view class="weui-cells weui-cells_after-title">
+              <radio-group id="{{currentForm.order}}" bindchange="radioChange">
+                  <label class="weui-cell weui-check__label" wx:for="{{currentForm.radioItems}}" wx:key="value">
+                      <radio class="weui-check" value="{{item.value}}" checked="{{item.checked}}"/>
                       <view class="weui-cell__bd">{{item.name}}</view>
                       <view class="weui-cell__ft weui-cell__ft_in-radio" wx:if="{{item.checked}}">
                           <icon class="weui-icon-radio" type="success_no_circle" size="16"></icon>
@@ -33,42 +26,16 @@
                   </label>
               </radio-group>
           </view>
-        </block>
-        <!--多选题-->
-        <block wx:elif="{{item.formType=='2'}}">
-          <view class="weui-cells__title">{{item.qText}}</view>
-          <view class="weui-cells weui-cells_after-title">
-              <checkbox-group id='{{item.order}}' bindchange="checkboxChange">
-                  <label class="weui-cell weui-check__label" wx:for="{{item.radioItems}}" wx:key="value">
-                      <checkbox class="weui-check" value="{{item.value}}" checked="{{item.checked}}"/>
+      </block>
 
-                      <view class="weui-cell__hd weui-check__hd_in-checkbox">
-                          <icon class="weui-icon-checkbox_circle" type="circle" size="23" wx:if="{{!item.checked}}"></icon>
-                          <icon class="weui-icon-checkbox_success" type="success" size="23" wx:if="{{item.checked}}"></icon>
-                      </view>
-                      <view class="weui-cell__bd">{{item.name}}</view>
-                  </label>
-              </checkbox-group>
-          </view>
-        </block>
-        <!--文本题？-->
-        <block wx:elif="{{item.formType=='3'}}">
-          <view class="weui-cells__title">{{item.qText}}</view>
-          <view class="weui-cells weui-cells_after-title">
-            <view class="weui-cell">
-                    <view class="weui-cell__bd">
-                        <textarea class="weui-textarea" placeholder="请输入文本" style="height: 3.3em" />
-                        <view class="weui-textarea-counter">0/200</view>
-                </view>
-            </view>
-          </view>
-
-        </block>
-
-
+      <!-- 进度条和切换按钮 -->
+      <progress percent="{{progress}}" stroke-width="6" activeColor="#4A90E2" show-info></progress>
+      <view class="btn-group">
+          <button class="weui-btn weui-btn_primary" wx:if="{{currentQuestionIndex > 0}}" bindtap="prevQuestion">上一题</button>
+          <button class="weui-btn weui-btn_primary" wx:if="{{currentQuestionIndex < totalQuestions - 1}}" bindtap="nextQuestion">下一题</button>
       </view>
 
-      <!--特别提醒-->
+      <!-- 特别提醒和提交按钮 -->
       <checkbox-group bindchange="bindAgreeChange">
           <label class="weui-agree" for="weuiAgree">
               <view class="weui-agree__text">
@@ -76,74 +43,8 @@
               </view>
           </label>
       </checkbox-group>
-      <!--提交按钮-->
       <view class="weui-btn-area">
           <button class="weui-btn" type="primary" bindtap="uploadForm">确定</button>
       </view>
   </view>
-
-  <view class="page__hd" wx:else>
-        
-    <view class="weui-agree__text">
-        特别提醒：在没有面谈评估的基础上，本测试仅供参考。鉴于人格障碍属精神障碍，此诊断必须由医疗机构给出！
-    </view>
-         
-    <view class="page__title">各项得分</view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[0]}}">偏执型：{{Charscore[0]}}分</view>
-    <view class="page__title" wx:else>偏执型：{{Charscore[0]}}分</view>
-    <view class="page__desc">•	（临界值4分）偏执型人格障碍的特征：广泛猜疑，常将他人无意的、非恶意的甚至友好的行为误解为敌意或歧视；将周围事物解释为不符合实际情况的“阴谋”；易产生病态嫉妒；过分自负；脱离实际地好争辩与敌对。 </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[1]}}">分裂样：{{Charscore[1]}}分</view>
-    <view class="page__title" wx:else>分裂样：{{Charscore[1]}}分</view>
-    <view class="page__desc">•	（临界值4分）分裂样人格障碍特征：与社会隔绝、情感疏远，缺乏人际交往，几乎总是单独行动；除了至亲外，没有亲密的朋友；没有与他人建立亲密关系的愿望，亦不能从中感到乐趣；对他人的批评或赞扬都反应冷淡。  </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[2]}}">分裂型：{{Charscore[2]}}分</view>
-    <view class="page__title" wx:else>分裂型：{{Charscore[2]}}分</view>
-    <view class="page__desc">•	（临界值5分）分裂型人格障碍特征：有奇异的信念，或与文化背景不相称的行为，如相信透视力、心灵感应；有不寻常知觉体验，比如幻觉看到不存在的人；的奇怪的、反常的或特殊的行为或外貌；言语怪异。  </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[3]}}">反社会型：{{Charscore[3]}}分</view>
-    <view class="page__title" wx:else>反社会型：{{Charscore[3]}}分</view>
-    <view class="page__desc">•	（临界值3分）反社会型人格障碍特征：行为与整个社会规范相背离而令人注目。这种人对他人的感受漠不关心，缺乏同情心。忽视社会 道德规范、行为准则和义务，长期地行为不负责任。他们的认识完好，但行为未加深思熟虑，不考虑后果，常因微小刺激便引起攻击、冲动和暴行。他们从无内疚 感，不能从经验中吸取教训，一犯再犯而不知悔改。  </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[4]}}">边缘型：{{Charscore[4]}}分</view>
-    <view class="page__title" wx:else>边缘型：{{Charscore[4]}}分</view>
-    <view class="page__desc">•	（临界值5分）边缘型人格障碍特征：人际关系不稳定和紧张，交替地变动于极端理想化和极端贬低之间；自我意象或自我感觉持久地和显著地不稳定；可能做成自我损害（例如，消费、性欲、物质滥用、鲁莽开车、暴食）；由于心境的反应性过强而致情感不稳定；长期感到空虚。   </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[5]}}">表演型：{{Charscore[5]}}分</view>
-    <view class="page__title" wx:else>表演型：{{Charscore[5]}}分</view>
-    <view class="page__desc">•	（临界值5分）表演型人格障碍特征：表情夸张，象演戏一样，装腔作势，情感体验肤浅；暗示性高，很容易受他人的影响；自我中心，强求别人符合他的需要或意志，不如意就给别人难堪或强烈不满；经常渴望表扬和同情，感情易受伤害；寻求刺激，积极参加各种社交活动；需要别人经常注意，为了引起注意，不惜哗众取宠，危言耸听，或者在外貌和行为方面表现得过分吸引异性；情感反应强烈、易变，完全按个人的情感判断好坏；说话夸大其词，掺杂幻想情节。  </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[6]}}">自恋型：{{Charscore[6]}}分</view>
-    <view class="page__title" wx:else>自恋型：{{Charscore[6]}}分</view>
-    <view class="page__desc">•	（临界值5分）自恋型人格障碍的特征：对批评的反应是愤怒、羞愧或感到耻辱；喜欢指使他人，要他人为自己服务；渴望持久的关注与赞美；过分自高自大，对自己的才能夸大其辞，希望受人特别关注；对无限的成功、权力、荣誉、美丽或理想爱情有非份的幻想；有很强的嫉妒心。   </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[7]}}">回避型：{{Charscore[7]}}分</view>
-    <view class="page__title" wx:else>回避型：{{Charscore[7]}}分</view>
-    <view class="page__desc">•	（临界值4分）回避型人格障碍特征：很容易因他人的批评或不赞同而受到伤害；除了至亲之外，没有好朋友或知心人(或仅有一个)； 除非确信受欢迎，一般总是不愿卷入他人事务之中；行为退缩，对需要人际交往的社会活动或工作总是尽量逃避；心理自卑，在社交场合总是缄默无语，怕惹人笑 话，伯回答不出问题；敏感羞涩，害怕在别人面前露出窘态；在做那些普通的但不在自己常规之中的事时，总是夸大潜在的困难、危险或可能的冒险。   </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[8]}}">依赖型：{{Charscore[8]}}分</view>
-    <view class="page__title" wx:else>依赖型：{{Charscore[8]}}分</view>
-    <view class="page__desc">•	（临界值5分）依赖型人格障碍特征：在没有从他人处得到大量的建议和保证之前，对日常事物不能作出决策；无助感，让别人为自己作大多数的重要决定，如在何处生活，该选择什么职业等；被遗弃感。明知他人错了，也随声附和，因为害怕被别人遗弃；无独立性，很难单独展开计划或做事；过度容忍，为讨好他人甘愿做低下的或自己不愿做的事；独处时有不适和无助感，或竭尽全力以逃避孤独；当亲密的关系中止时感到无助或崩溃；经常被遭人遗弃的念头所折磨。 </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[9]}}">强迫型：{{Charscore[9]}}分</view>
-    <view class="page__title" wx:else>强迫型：{{Charscore[9]}}分</view>
-    <view class="page__desc">•	（临界值4分）强迫型人格障碍特征：过分疑虑及谨慎；对细节、规则、条目、秩序、组织或表格过分关注；完美主义，以至影响了工作的完成；道德感过强，谨小慎微，过分看重工作成效而不顾乐趣和人际关系；过分迂腐，拘泥于社会习俗；刻板和固执。    </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[10]}}">被动攻击型：{{Charscore[10]}}分</view>
-    <view class="page__title" wx:else>被动攻击型：{{Charscore[10]}}分</view>
-    <view class="page__desc">•	（临界值4分）被动攻击型人格障碍特征：以被动的方式表现其强烈的攻击倾向，表面上唯唯诺诺，背地里则不予合作，顽固执拗，行动拖拉，暗中阻挠工作的进程。此外，当事人内心虽然具有强烈的攻击倾向和仇视情感，但却尽力加以掩盖，不敢显露；虽然牢骚满腹，但内心却极想依赖权威。    </view>
-
-    <view class="page__title__red" wx:if="{{Charsuspect[11]}}">抑郁型：{{Charscore[11]}}分</view>
-    <view class="page__title" wx:else>抑郁型：{{Charscore[11]}}分</view>
-    <view class="page__desc">•	（临界值5分）抑郁型人格障碍的特征：为人悲观，总是消极的看问题；沉浸在抑郁的心境中；一些细微的事情就会引起忧虑。    </view>
-
-        <view class="page__title__red" wx:if="{{Charsuspect[12]}}">本问卷掩饰怀疑值：{{Charscore[12]}}分</view>
-    <view class="page__title" wx:else>本问卷掩饰怀疑值：{{Charscore[12]}}分</view>
-    <view class="page__desc">•	（临界值5分）    </view>
-
-  </view>
-
-
-  
 </view>
